@@ -1,40 +1,46 @@
 export default class PFRoundResultPublisher {
-    constructor(gameData, publisher) {
-        this.publisher = publisher;
-        this.gameData = gameData;
+  constructor(gameData, publisher) {
+    this.publisher = publisher;
+    this.gameData = gameData;
+  }
+
+  publishRoundResult(roundResult) {
+    const payload = { finish: roundResult };
+
+    if (this.gameData.pf) {
+      this.publisher.publishToAllUsers({
+        ...payload,
+        pf: {
+          ...this.gameData.pf,
+          roundId: this.gameData.roundId,
+          result: this.gameData.result,
+        },
+      });
+    } else {
+      this.publisher.publishToAllUsers(payload);
     }
 
-    publishRoundResult(roundResult) {
-        const payload = { finish: roundResult };
+    this.publisher.publishToAllAdmins(payload);
+  }
 
-        if (this.gameData.pf) {
-            this.publisher.publishToAllUsers({
-                ...payload,
-                pf: { ...this.gameData.pf, roundId: this.gameData.roundId },
-            });
-        } else {
-            this.publisher.publishToAllUsers(payload);
-        }
+  publishServerSeedHash() {
+    const { serverSeedHash } = this.gameData.pf;
 
-        this.publisher.publishToAllAdmins(payload);
+    if (serverSeedHash) {
+      const pf = { serverSeedHash, roundId: this.gameData.roundId };
+
+      this.publisher.publishToAllUsers({ pf });
     }
+  }
 
-    publishServerSeedHash() {
-        if (this.gameData.pf.serverSeedHash) {
-            const pf = { serverSeedHash, roundId: this.gameData.roundId };
+  publishWinners(roundId, winningPlayers) {
+    const payload = {
+      roundId,
+      winningPlayers,
+    };
 
-            this.publisher.publishToAllUsers({ pf });
-        }
-    }
-
-    publishWinners(roundId, winningPlayers) {
-        const payload = {
-            roundId,
-            winningPlayers,
-        };
-
-        this.publishToAllUsers({
-            winners: payload,
-        });
-    }
+    this.publishToAllUsers({
+      winners: payload,
+    });
+  }
 }
