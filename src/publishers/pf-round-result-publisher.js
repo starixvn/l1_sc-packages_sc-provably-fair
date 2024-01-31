@@ -9,11 +9,13 @@ export default class PFRoundResultPublisher {
 
     if (this.gameData.pf) {
       this.publisher.publishToAllUsers({
-        ...payload,
-        pf: {
-          ...this.gameData.pf,
-          roundId: this.gameData.roundId,
-          result: this.gameData.result,
+        finish: {
+          roundResult,
+          pf: {
+            ...this.gameData.pf,
+            roundId: this.gameData.roundId,
+            result: this.gameData.result,
+          },
         },
       });
     } else {
@@ -39,7 +41,7 @@ export default class PFRoundResultPublisher {
       winningPlayers,
     };
 
-    this.publishToAllUsers({
+    this.publisher.publishToAllUsers({
       winners: payload,
     });
   }
