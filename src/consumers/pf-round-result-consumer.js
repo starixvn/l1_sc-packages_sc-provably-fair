@@ -68,7 +68,7 @@ export default class PFRoundResultConsumer {
       const serverSeed = generateServerSeed(randomMode);
       const serverSeedHash = getSHA256Hash(serverSeed);
 
-      this.gameData.pf = { serverSeed, serverSeedHash };
+      this.gameData.pf = { ...this.gameData.pf, serverSeed, serverSeedHash };
 
       await this.createResultRecord(serverSeed, serverSeedHash);
 
