@@ -10,7 +10,7 @@ export default class PFRoundResultPublisher {
     if (this.gameData.pf) {
       this.publisher.publishToAllUsers({
         finish: {
-          roundResult,
+          ...roundResult,
           pf: {
             ...this.gameData.pf,
             roundId: this.gameData.roundId,
