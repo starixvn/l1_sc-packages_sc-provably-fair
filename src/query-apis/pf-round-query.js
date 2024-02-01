@@ -4,9 +4,13 @@ export default class PFRoundQuery {
         this.resultsRepository = resultsRepository;
     }
 
-    convertSettlementResult(roundResult) {}
+    convertSettlementResult(roundResult) {
+        return roundResult;
+    }
 
-    convertResult(round) {}
+    convertResult(round) {
+        return round;
+    }
 
     async getList(limit, projections) {
         const rounds = await this.roundsRepository
