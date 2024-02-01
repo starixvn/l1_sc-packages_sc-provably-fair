@@ -25,11 +25,16 @@ export default class PFRoundQuery {
 
         return rounds.map((round) => {
             const roundResults = results.find((result) => result.roundId === round.id);
+            const result = round.result ?? this.convertResult(round);
+            const settlementResult = round.settlementResult ?? this.convertSettlementResult(round.result);
 
             return {
                 roundId: round.id,
+                result,
+                settlementResult,
                 pf: {
                     ...roundResults,
+                    result,
                 },
             };
         });
