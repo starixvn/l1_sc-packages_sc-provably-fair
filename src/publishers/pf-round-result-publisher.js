@@ -1,48 +1,48 @@
 export default class PFRoundResultPublisher {
-  constructor(gameData, publisher) {
-    this.publisher = publisher;
-    this.gameData = gameData;
-  }
-
-  publishRoundResult(roundResult) {
-    const payload = { finish: roundResult };
-
-    if (this.gameData.pf) {
-      this.publisher.publishToAllUsers({
-        finish: {
-          ...roundResult,
-          pf: {
-            ...this.gameData.pf,
-            roundId: this.gameData.roundId,
-            result: this.gameData.result,
-          },
-        },
-      });
-    } else {
-      this.publisher.publishToAllUsers(payload);
+    constructor(gameData, publisher) {
+        this.publisher = publisher;
+        this.gameData = gameData;
     }
 
-    this.publisher.publishToAllAdmins(payload);
-  }
+    publishRoundResult(roundResult) {
+        const payload = { finish: roundResult };
 
-  publishServerSeedHash() {
-    const { serverSeedHash } = this.gameData.pf;
+        if (this.gameData.pf) {
+            this.publisher.publishToAllUsers({
+                finish: {
+                    ...roundResult,
+                    pf: {
+                        ...this.gameData.pf,
+                        roundId: this.gameData.roundId,
+                        result: this.gameData.result,
+                    },
+                },
+            });
+        } else {
+            this.publisher.publishToAllUsers(payload);
+        }
 
-    if (serverSeedHash) {
-      const pf = { serverSeedHash, roundId: this.gameData.roundId };
-
-      this.publisher.publishToAllUsers({ pf });
+        this.publisher.publishToAllAdmins(payload);
     }
-  }
 
-  publishWinners(roundId, winningPlayers) {
-    const payload = {
-      roundId,
-      winningPlayers,
-    };
+    publishServerSeedHash() {
+        const { serverSeedHash } = this.gameData.pf;
 
-    this.publisher.publishToAllUsers({
-      winners: payload,
-    });
-  }
+        if (serverSeedHash) {
+            const pf = { serverSeedHash, roundId: this.gameData.roundId };
+
+            this.publisher.publishToAllUsers({ pf });
+        }
+    }
+
+    publishWinners(roundId, winningPlayers) {
+        const payload = {
+            roundId,
+            winningPlayers,
+        };
+
+        this.publisher.publishToAllUsers({
+            winners: payload,
+        });
+    }
 }
