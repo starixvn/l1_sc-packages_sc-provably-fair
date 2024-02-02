@@ -1,4 +1,4 @@
-import { getMergeClientSeed, getMergeSeed, getSHA256Hash, getSHA512Hash } from "../helpers/seed-helper";
+import { getMergeClientSeed, getSHA256Hash, getSHA512Hash } from "../helpers/seed-helper";
 import { generateServerSeed } from "../helpers/server-seed-helper";
 
 export default class PFRoundResultConsumer {
