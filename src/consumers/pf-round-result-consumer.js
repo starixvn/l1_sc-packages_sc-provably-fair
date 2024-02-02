@@ -1,4 +1,4 @@
-import { getMergeSeed, getSHA256Hash, getSHA512Hash } from "../helpers/seed-helper";
+import { getMergeClientSeed, getMergeSeed, getSHA256Hash, getSHA512Hash } from "../helpers/seed-helper";
 import { generateServerSeed } from "../helpers/server-seed-helper";
 
 export default class PFRoundResultConsumer {
@@ -17,7 +17,8 @@ export default class PFRoundResultConsumer {
             this.gameData.result = resultFromAdmin.result;
         } else {
             const { serverSeed, clientSeeds, serverSeedHash } = this.gameData.pf;
-            const mergeSeed = getMergeSeed(serverSeed, clientSeeds);
+            const mergeClientSeed = getMergeClientSeed(clientSeeds);
+            const mergeSeed = serverSeed + mergeClientSeed;
             const finalHash = getSHA512Hash(mergeSeed);
 
             await this.resultsRepository.findOneAndUpdate(
@@ -26,6 +27,7 @@ export default class PFRoundResultConsumer {
                 },
                 {
                     mergeSeed,
+                    mergeClientSeed,
                     clientSeeds,
                     finalHash,
                 }
@@ -35,6 +37,7 @@ export default class PFRoundResultConsumer {
                 serverSeed,
                 serverSeedHash,
                 clientSeeds,
+                mergeClientSeed,
                 mergeSeed,
                 finalHash,
             };
@@ -45,12 +48,13 @@ export default class PFRoundResultConsumer {
 
     async generateServerSeedAndPublishHash(lastResultRecord) {
         if (lastResultRecord && lastResultRecord.roundId === this.gameData.roundId) {
-            const { serverSeed, serverSeedHash, clientSeeds, mergeSeed, finalHash } = lastResultRecord;
+            const { serverSeed, serverSeedHash, clientSeeds, mergeClientSeed, mergeSeed, finalHash } = lastResultRecord;
 
             this.gameData.pf = {
                 serverSeed,
                 serverSeedHash,
                 clientSeeds,
+                mergeClientSeed,
                 mergeSeed,
                 finalHash,
             };
