@@ -19,7 +19,7 @@ export default class PFRoundResultConsumer {
         }
 
         if (this.gameData.pf.finalHash) {
-            this.gameData.result = this.definition.generateResult(finalHash);
+            this.gameData.result = this.definition.generateResult(this.gameData.pf.finalHash);
             return;
         }
 
