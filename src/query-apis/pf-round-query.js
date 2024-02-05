@@ -42,9 +42,14 @@ export default class PFRoundQuery {
 
     async getOne(id, projections = { _id: false }) {
         const round = await this.roundsRepository.findOne({ id }, projections).lean().exec();
+        const pfResult = await this.resultsRepository.findOne({ roundId: id }, { _id: false, time: false, _v: false }).lean().exec();
 
         round.result = round.result ?? this.convertResult(round);
         round.settlementResult = round.settlementResult ?? this.convertSettlementResult(round.result);
+        round.pf = {
+            result: round.result,
+            ...pfResult,
+        };
 
         return round;
     }
