@@ -1,4 +1,4 @@
-export class ProvablyFairConsumer {
+export default class ProvablyFairConsumer {
     MaxCombinedClientSeeds = 5;
     ClientSeedRange = { min: 0, max: 9999 };
 
