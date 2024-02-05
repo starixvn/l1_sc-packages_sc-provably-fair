@@ -1,4 +1,4 @@
-export default class PFHistoryQuery extends QueryApis.HistoryQuery {
+export default class PFHistoryQuery{
     constructor(roundQuery, betsRepository, betLogsRepository) {
         this.roundQuery = roundQuery;
         this.betsRepository = betsRepository;
