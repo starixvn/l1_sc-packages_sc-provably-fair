@@ -1,6 +1,6 @@
 {
   "name": "sc-provably-fair",
-  "version": "1.0.1-beta.16",
+  "version": "1.0.1-beta.17",
   "main": "./src/index.js",
   "type": "module",
   "license": "MIT",
