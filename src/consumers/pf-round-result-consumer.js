@@ -15,35 +15,39 @@ export default class PFRoundResultConsumer {
 
         if (roundId === resultFromAdmin.roundId) {
             this.gameData.result = resultFromAdmin.result;
-        } else {
-            const { serverSeed, clientSeeds, serverSeedHash } = this.gameData.pf;
-            const mergeClientSeed = getMergeClientSeed(clientSeeds);
-            const mergeSeed = serverSeed + mergeClientSeed;
-            const finalHash = getSHA512Hash(mergeSeed);
-
-            await this.resultsRepository.findOneAndUpdate(
-                {
-                    roundId,
-                },
-                {
-                    mergeSeed,
-                    mergeClientSeed,
-                    clientSeeds,
-                    finalHash,
-                }
-            );
-
-            this.gameData.pf = {
-                serverSeed,
-                serverSeedHash,
-                clientSeeds,
-                mergeClientSeed,
-                mergeSeed,
-                finalHash,
-            };
-
-            this.gameData.result = this.definition.generateResult(finalHash);
+            return;
         }
+
+        if (this.gameData.pf.finalHash) {
+            this.gameData.result = this.definition.generateResult(finalHash);
+            return;
+        }
+
+        const { serverSeed, clientSeeds, serverSeedHash } = this.gameData.pf;
+        const mergeClientSeed = getMergeClientSeed(clientSeeds);
+        const mergeSeed = serverSeed + mergeClientSeed;
+        const finalHash = getSHA512Hash(mergeSeed);
+
+        await this.resultsRepository.findOneAndUpdate(
+            { roundId },
+            {
+                mergeSeed,
+                mergeClientSeed,
+                clientSeeds,
+                finalHash,
+            }
+        );
+
+        this.gameData.pf = {
+            serverSeed,
+            serverSeedHash,
+            clientSeeds,
+            mergeClientSeed,
+            mergeSeed,
+            finalHash,
+        };
+
+        this.gameData.result = this.definition.generateResult(finalHash);
     }
 
     async generateServerSeedAndPublishHash(lastResultRecord) {
@@ -58,7 +62,6 @@ export default class PFRoundResultConsumer {
                 mergeSeed,
                 finalHash,
             };
-            this.gameData.result = this.definition.generateResult(finalHash);
         } else {
             const { randomMode } = this.gameData.gameConfigs;
             const serverSeed = generateServerSeed(randomMode);
@@ -67,9 +70,9 @@ export default class PFRoundResultConsumer {
             this.gameData.pf = { ...this.gameData.pf, serverSeed, serverSeedHash };
 
             await this.createResultRecord(serverSeed, serverSeedHash);
-
-            this.roundResultPublisher.publishServerSeedHash();
         }
+
+        this.roundResultPublisher.publishServerSeedHash();
     }
 
     async createResultRecord(serverSeed, serverSeedHash) {
