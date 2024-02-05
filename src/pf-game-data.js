@@ -4,15 +4,6 @@ export default class PFGameData {
         this.resetPF();
     }
 
-    addPlayerToBetList(playerId, { name, amount, rate, autoCashOut }) {
-        this.betList[playerId] = { time: new Date(), playerId, name, amount, rate, autoCashOut };
-    }
-
-    updatePlayerAction(playerId, action, data) {
-        this.betList[playerId][action] = data;
-        this.betList[playerId].time = new Date();
-    }
-
     addClientSeed({ name, clientSeed }) {
         this.pf.clientSeeds.length < this.maxCombinedClientSeeds && this.pf.clientSeeds.push({ name, clientSeed });
     }
