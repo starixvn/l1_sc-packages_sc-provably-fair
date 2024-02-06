@@ -10,8 +10,7 @@ export default class PFRoundResultConsumer {
     }
 
     async generateResult() {
-        const resultFromAdmin = this.gameData.settlementResultFromAdmin;
-        const { roundId, pf } = this.gameData;
+        const { roundId, pf, settlementResultFromAdmin: resultFromAdmin } = this.gameData;
 
         if (roundId === resultFromAdmin.roundId) {
             this.gameData.result = resultFromAdmin.result;
