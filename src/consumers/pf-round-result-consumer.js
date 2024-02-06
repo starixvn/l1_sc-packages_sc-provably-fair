@@ -1,5 +1,4 @@
-import { getMergeClientSeed, getSHA256Hash, getSHA512Hash } from "../helpers/seed-helper";
-import { generateServerSeed } from "../helpers/server-seed-helper";
+import { SeedHelper, ServerSeedHelper } from "../helpers";
 
 export default class PFRoundResultConsumer {
     constructor(gameData, definition, roundResultPublisher, resultsRepository) {
@@ -14,11 +13,6 @@ export default class PFRoundResultConsumer {
 
         if (roundId === resultFromAdmin.roundId) {
             this.gameData.result = resultFromAdmin.result;
-            return;
-        }
-
-        if (pf.finalHash) {
-            this.gameData.result = this.definition.generateResult(this.gameData.pf.finalHash);
             return;
         }
 
@@ -39,34 +33,21 @@ export default class PFRoundResultConsumer {
 
     generateFinalSeeds(pf) {
         const { serverSeed, clientSeeds } = pf;
-        const mergeClientSeed = getMergeClientSeed(clientSeeds);
+        const mergeClientSeed = SeedHelper.getMergeClientSeed(clientSeeds);
         const mergeSeed = serverSeed + mergeClientSeed;
-        const finalHash = getSHA512Hash(mergeSeed);
+        const finalHash = SeedHelper.getSHA512Hash(mergeSeed);
 
         return { clientSeeds, mergeClientSeed, mergeSeed, finalHash };
     }
 
-    async generateServerSeedAndPublishHash(lastResultRecord) {
-        if (lastResultRecord && lastResultRecord.roundId === this.gameData.roundId) {
-            const { serverSeed, serverSeedHash, clientSeeds, mergeClientSeed, mergeSeed, finalHash } = lastResultRecord;
+    async generateServerSeedAndPublishHash() {
+        const { randomMode } = this.gameData.gameConfigs;
+        const serverSeed = ServerSeedHelper.generateServerSeed(randomMode);
+        const serverSeedHash = SeedHelper.getSHA256Hash(serverSeed);
 
-            this.gameData.pf = {
-                serverSeed,
-                serverSeedHash,
-                clientSeeds,
-                mergeClientSeed,
-                mergeSeed,
-                finalHash,
-            };
-        } else {
-            const { randomMode } = this.gameData.gameConfigs;
-            const serverSeed = generateServerSeed(randomMode);
-            const serverSeedHash = getSHA256Hash(serverSeed);
+        this.gameData.pf = { ...this.gameData.pf, serverSeed, serverSeedHash };
 
-            this.gameData.pf = { ...this.gameData.pf, serverSeed, serverSeedHash };
-
-            await this.createResultRecord(serverSeed, serverSeedHash);
-        }
+        await this.createResultRecord(serverSeed, serverSeedHash);
 
         this.roundResultPublisher.publishServerSeedHash();
     }
