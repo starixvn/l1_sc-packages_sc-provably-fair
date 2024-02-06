@@ -11,43 +11,40 @@ export default class PFRoundResultConsumer {
 
     async generateResult() {
         const resultFromAdmin = this.gameData.settlementResultFromAdmin;
-        const { roundId } = this.gameData;
+        const { roundId, pf } = this.gameData;
 
         if (roundId === resultFromAdmin.roundId) {
             this.gameData.result = resultFromAdmin.result;
             return;
         }
 
-        if (this.gameData.pf.finalHash) {
+        if (pf.finalHash) {
             this.gameData.result = this.definition.generateResult(this.gameData.pf.finalHash);
             return;
         }
 
-        const { serverSeed, clientSeeds, serverSeedHash } = this.gameData.pf;
-        const mergeClientSeed = getMergeClientSeed(clientSeeds);
-        const mergeSeed = serverSeed + mergeClientSeed;
-        const finalHash = getSHA512Hash(mergeSeed);
+        const { serverSeed, serverSeedHash } = pf;
+        const finalSeeds = this.generateFinalSeeds(pf);
 
         await this.resultsRepository.findOneAndUpdate(
             { roundId },
             {
-                mergeSeed,
-                mergeClientSeed,
-                clientSeeds,
-                finalHash,
+                ...finalSeeds,
             }
         );
 
-        this.gameData.pf = {
-            serverSeed,
-            serverSeedHash,
-            clientSeeds,
-            mergeClientSeed,
-            mergeSeed,
-            finalHash,
-        };
+        this.gameData.pf = Object.assign(serverSeed, serverSeedHash, finalSeeds);
 
-        this.gameData.result = this.definition.generateResult(finalHash);
+        this.gameData.result = this.definition.generateResult(finalSeeds.finalHash);
+    }
+
+    generateFinalSeeds(pf) {
+        const { serverSeed, clientSeeds } = pf;
+        const mergeClientSeed = getMergeClientSeed(clientSeeds);
+        const mergeSeed = serverSeed + mergeClientSeed;
+        const finalHash = getSHA512Hash(mergeSeed);
+
+        return { clientSeeds, mergeClientSeed, mergeSeed, finalHash };
     }
 
     async generateServerSeedAndPublishHash(lastResultRecord) {
