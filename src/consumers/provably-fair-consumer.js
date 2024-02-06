@@ -28,8 +28,16 @@ export default class ProvablyFairConsumer {
     reset() {
         this.gameData.pf = { clientSeeds: [], serverSeed: "" };
     }
+    
+    generateClientSeeds(bets) {
+        const clientSeeds = [];
+        const sortedBets = [...bets].sort((b1, b2) => b1.time - b2.time);
+        sortedBets.slice(0, this.MaxCombinedClientSeeds).forEach(({ name, clientSeed }) => clientSeeds.push({ name, clientSeed }));
+
+        return clientSeeds;
+    }
 
     updateClientSeeds(clientSeeds) {
-        this.gameData.pd.clientSeeds = clientSeeds;
+        this.gameData.pf.clientSeeds = clientSeeds;
     }
 }
