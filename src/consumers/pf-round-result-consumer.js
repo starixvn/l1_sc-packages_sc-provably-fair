@@ -26,7 +26,7 @@ export default class PFRoundResultConsumer {
             }
         );
 
-        this.gameData.pf = Object.assign({}, serverSeed, serverSeedHash, finalSeeds);
+        this.gameData.pf = Object.assign(finalSeeds, { serverSeed, serverSeedHash });
 
         this.gameData.result = this.definition.generateResult(finalSeeds.finalHash);
     }
